@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  mysql:
+    container_name: skeleton_db
+    image: mysql:latest
+    command: >-
+      bash -c
+      "exec /entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+    volumes:
+      - ./.mysql/logs:/var/log/mysql:rw
+      - ./.mysql/conf:/etc/mysql/conf.d
+    user: "root"
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_DATABASE=skeleton-db
+    ports:
+      - "3306:3306"
