@@ -35,7 +35,7 @@ export class BooksService {
     return this.bookRepository.save(finalBookInput);
   }
 
-  findAll(input?: GetBookInput): Promise<Book[]> {
+  async findAll(input?: GetBookInput): Promise<Book[]> {
     const queryBuilder = this.bookRepository
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.author', 'author');
@@ -50,7 +50,13 @@ export class BooksService {
       queryBuilder.whereInIds(input.id);
     }
 
-    return queryBuilder.getMany();
+    const books = await queryBuilder.getMany();
+
+    if (!books.length) {
+      throw new GraphQLError('No books found');
+    }
+
+    return books;
   }
 
   findOne(id: number): Promise<Book> {

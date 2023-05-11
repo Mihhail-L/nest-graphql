@@ -7,6 +7,7 @@ import { Author } from '../authors/entities/author.entity';
 import { AuthorsService } from '../authors/authors.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetBookInput } from './dto/get-book.input';
+import { DeleteResult } from 'typeorm';
 
 @Resolver(() => Book)
 export class BooksResolver {
@@ -17,7 +18,9 @@ export class BooksResolver {
   ) {}
 
   @Mutation(() => Book)
-  createBook(@Args('createBookInput') createBookInput: CreateBookInput) {
+  createBook(
+    @Args('createBookInput') createBookInput: CreateBookInput,
+  ): Promise<Book> {
     return this.booksService.create(createBookInput);
   }
 
@@ -28,18 +31,22 @@ export class BooksResolver {
       type: () => GetBookInput,
       nullable: true,
     })
-    getBookInput: GetBookInput,
-  ) {
+    getBookInput?: GetBookInput,
+  ): Promise<Book[]> {
     return this.booksService.findAll(getBookInput);
   }
 
   @Mutation(() => Book)
-  updateBook(@Args('updateBookInput') updateBookInput: UpdateBookInput) {
+  updateBook(
+    @Args('updateBookInput') updateBookInput: UpdateBookInput,
+  ): Promise<Book> {
     return this.booksService.update(updateBookInput.id, updateBookInput);
   }
 
   @Mutation(() => Book)
-  removeBook(@Args('id', { type: () => Int }) id: number) {
+  removeBook(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<DeleteResult> {
     return this.booksService.remove(id);
   }
 }

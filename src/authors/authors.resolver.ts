@@ -39,7 +39,7 @@ export class AuthorsResolver {
       nullable: true,
       type: () => GetAuthorInput,
     })
-    getAuthorInput: GetAuthorInput,
+    getAuthorInput?: GetAuthorInput,
   ): Promise<Author[]> {
     return this.authorsService.findAll(getAuthorInput);
   }
