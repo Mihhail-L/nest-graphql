@@ -9,5 +9,6 @@ import { BooksService } from '../books/books.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Author, Book])],
   providers: [AuthorsResolver, AuthorsService, BooksService],
+  exports: [TypeOrmModule],
 })
 export class AuthorsModule {}
