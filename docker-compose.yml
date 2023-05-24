@@ -9,7 +9,7 @@ services:
       "exec /entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
     volumes:
       - ./.mysql/logs:/var/log/mysql:rw
-      - ./.mysql/conf:/etc/mysql/conf.d
+      - ./.mysql/conf:/docker-entrypoint-initdb.d
     user: "root"
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
