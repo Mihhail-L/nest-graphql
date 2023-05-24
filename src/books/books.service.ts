@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookInput } from './dto/create-book.input';
 import { UpdateBookInput } from './dto/update-book.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Author } from '../authors/entities/author.entity';
-import { GraphQLError } from 'graphql/error';
 import { GetBookInput } from './dto/get-book.input';
+import { DeleteResult } from '../common/graphql/commonTypes/deleteResult';
 
 @Injectable()
 export class BooksService {
@@ -28,7 +28,7 @@ export class BooksService {
           id: author,
         });
       } catch (error) {
-        throw new GraphQLError('Author not found');
+        throw new NotFoundException(`Author not found ${author}`);
       }
     }
 
@@ -40,20 +40,20 @@ export class BooksService {
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.author', 'author');
 
+    if (input?.id) {
+      queryBuilder.whereInIds(input.id);
+    }
+
     if (input?.author) {
       queryBuilder.where('author.id in (:...author)', {
         author: input.author,
       });
     }
 
-    if (input?.id) {
-      queryBuilder.whereInIds(input.id);
-    }
-
     const books = await queryBuilder.getMany();
 
-    if (!books.length) {
-      throw new GraphQLError('No books found');
+    if (!books.length && input?.id) {
+      throw new NotFoundException(`No book found for ${input.id}`);
     }
 
     return books;
@@ -68,11 +68,11 @@ export class BooksService {
     });
   }
 
-  async update(id: number, updateBookInput: UpdateBookInput): Promise<Book> {
-    const book = await this.findOne(id);
+  async update(updateBookInput: UpdateBookInput): Promise<Book> {
+    const book = await this.findOne(updateBookInput.id);
 
     if (!book) {
-      throw new GraphQLError('Book not found');
+      throw new NotFoundException(`Book not found ${updateBookInput.id}`);
     }
 
     const { description, title, author } = updateBookInput;
@@ -91,15 +91,25 @@ export class BooksService {
           id: author,
         });
       } catch (error) {
-        throw new GraphQLError('Author not found');
+        throw new NotFoundException(`Author not found ${author}`);
       }
     }
 
     return this.bookRepository.save(book);
   }
 
-  remove(id: number): Promise<DeleteResult> {
-    return this.bookRepository.delete(id);
+  async remove(id: number): Promise<DeleteResult> {
+    const book = await this.findOne(id);
+
+    if (!book) {
+      throw new NotFoundException(`Book not found ${id}`);
+    }
+    const deleteResult = await this.bookRepository.delete(id);
+
+    return {
+      deletedCount: deleteResult.affected,
+      acknowledged: deleteResult.affected > 0,
+    };
   }
 
   findAllByAuthor(authorId: number): Promise<Book[]> {

@@ -2,13 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Author {
-  id: Int!
-  firstName: String!
-  lastName: String!
-  books: [Book!]
-}
-
 type Book {
   id: Int!
   title: String!
@@ -16,10 +9,23 @@ type Book {
   author: Author
 }
 
+type Author {
+  id: Int!
+  firstName: String!
+  lastName: String!
+  books: [Book!]
+}
+
+type DeleteResult {
+  acknowledged: Boolean!
+  deletedCount: Float!
+}
+
 type Query {
-  getBooks(getBookInput: GetBookInput): [Book!]!
-  getAuthors(getAuthorInput: GetAuthorInput): [Author!]!
-  author(id: Int!): Author!
+  getBooks(input: GetBookInput): [Book!]!
+
+  """Get authors"""
+  getAuthors(input: GetAuthorInput): [Author!]
 }
 
 input GetBookInput {
@@ -33,12 +39,18 @@ input GetAuthorInput {
 }
 
 type Mutation {
-  createBook(createBookInput: CreateBookInput!): Book!
-  updateBook(updateBookInput: UpdateBookInput!): Book!
+  createBook(input: CreateBookInput!): Book!
+  updateBook(input: UpdateBookInput!): Book!
   removeBook(id: Int!): Book!
-  createAuthor(createAuthorInput: CreateAuthorInput!): Author!
-  updateAuthor(updateAuthorInput: UpdateAuthorInput!): Author!
-  removeAuthor(id: Int!): Author!
+
+  """Create a new author"""
+  createAuthor(input: CreateAuthorInput!): Author!
+
+  """Update an author"""
+  updateAuthor(input: UpdateAuthorInput!): Author!
+
+  """Delete an author"""
+  deleteAuthor(id: Int!): DeleteResult!
 }
 
 input CreateBookInput {

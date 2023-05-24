@@ -3,31 +3,22 @@ import { BooksService } from './books.service';
 import { Book } from './entities/book.entity';
 import { CreateBookInput } from './dto/create-book.input';
 import { UpdateBookInput } from './dto/update-book.input';
-import { Author } from '../authors/entities/author.entity';
-import { AuthorsService } from '../authors/authors.service';
-import { InjectRepository } from '@nestjs/typeorm';
 import { GetBookInput } from './dto/get-book.input';
-import { DeleteResult } from 'typeorm';
+import { DeleteResult } from '../common/graphql/commonTypes/deleteResult';
 
 @Resolver(() => Book)
 export class BooksResolver {
-  constructor(
-    private readonly booksService: BooksService,
-    @InjectRepository(Author)
-    private readonly authorsService: AuthorsService,
-  ) {}
+  constructor(private readonly booksService: BooksService) {}
 
   @Mutation(() => Book)
-  createBook(
-    @Args('createBookInput') createBookInput: CreateBookInput,
-  ): Promise<Book> {
+  createBook(@Args('input') createBookInput: CreateBookInput): Promise<Book> {
     return this.booksService.create(createBookInput);
   }
 
   @Query(() => [Book], { name: 'getBooks' })
-  findAll(
+  getBooks(
     @Args({
-      name: 'getBookInput',
+      name: 'input',
       type: () => GetBookInput,
       nullable: true,
     })
@@ -37,10 +28,8 @@ export class BooksResolver {
   }
 
   @Mutation(() => Book)
-  updateBook(
-    @Args('updateBookInput') updateBookInput: UpdateBookInput,
-  ): Promise<Book> {
-    return this.booksService.update(updateBookInput.id, updateBookInput);
+  updateBook(@Args('input') updateBookInput: UpdateBookInput): Promise<Book> {
+    return this.booksService.update(updateBookInput);
   }
 
   @Mutation(() => Book)

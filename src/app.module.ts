@@ -9,10 +9,13 @@ import {
   MYSQL_PASSWORD,
   MYSQL_PORT,
   MYSQL_USERNAME,
+  NODE_ENV,
 } from './util/envConfig';
 import { BooksModule } from './books/books.module';
 import { AuthorsModule } from './authors/authors.module';
 import { DataSource } from 'typeorm';
+import { GraphQLError } from 'graphql';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -24,20 +27,30 @@ import { DataSource } from 'typeorm';
       password: MYSQL_PASSWORD,
       database: MYSQL_DATABASE,
       autoLoadEntities: true,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       playground: true,
-      autoSchemaFile: 'src/schema.gql',
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      formatError: (error: GraphQLError) => {
+        const graphQLFormattedError: any = {
+          message: error.message,
+          originalError: error.extensions?.originalError,
+        };
+
+        return graphQLFormattedError;
+      },
+      introspection: NODE_ENV !== 'production',
     }),
     ConfigModule.forRoot({
+      envFilePath: '.env',
       isGlobal: true,
     }),
     BooksModule,
     AuthorsModule,
   ],
+  exports: [AppModule],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

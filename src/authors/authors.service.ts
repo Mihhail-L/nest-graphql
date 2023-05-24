@@ -3,9 +3,10 @@ import { CreateAuthorInput } from './dto/create-author.input';
 import { UpdateAuthorInput } from './dto/update-author.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Author } from './entities/author.entity';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { GetAuthorInput } from './dto/get-author.input';
-import { GraphQLError } from 'graphql/error';
+import { DeleteResult } from '../common/graphql/commonTypes/deleteResult';
+import { last } from 'rxjs';
 
 @Injectable()
 export class AuthorsService {
@@ -17,20 +18,23 @@ export class AuthorsService {
     return this.authorRepository.save(createAuthorInput);
   }
 
-  async findAll(input: GetAuthorInput): Promise<Author[]> {
-    const query = this.authorRepository.createQueryBuilder('author');
+  async findAll(input?: GetAuthorInput): Promise<Author[]> {
+    const query = this.authorRepository
+      .createQueryBuilder('author')
+      .leftJoinAndSelect('author.books', 'book');
+
     if (input?.id) {
       query.whereInIds(input.id);
     }
     if (input?.book) {
-      query
-        .leftJoinAndSelect('author.books', 'book')
-        .where('book.id IN (:...bookIds)', { bookIds: input.book });
+      query.where('book.id IN (:...bookIds)', { bookIds: input.book });
     }
     const authors = await query.getMany();
 
-    if (!authors.length) {
-      throw new NotFoundException('No authors found');
+    if (!authors.length && input) {
+      throw new NotFoundException(
+        `No authors found for input ${JSON.stringify(input)}`,
+      );
     }
 
     return authors;
@@ -42,14 +46,26 @@ export class AuthorsService {
     });
   }
 
-  update(
-    id: number,
-    updateAuthorInput: UpdateAuthorInput,
-  ): Promise<UpdateResult> {
-    return this.authorRepository.update({ id }, updateAuthorInput);
+  update({
+    id,
+    firstName,
+    lastName,
+  }: UpdateAuthorInput): Promise<UpdateResult> {
+    return this.authorRepository.update({ id }, { firstName, lastName });
   }
 
-  remove(id: number): Promise<DeleteResult> {
-    return this.authorRepository.delete({ id });
+  async remove(id: number): Promise<DeleteResult> {
+    const author = await this.findOne(id);
+
+    if (!author) {
+      throw new NotFoundException(`No author found for ${id}`);
+    }
+
+    const deleteResult = await this.authorRepository.delete({ id });
+
+    return {
+      acknowledged: deleteResult.affected > 0,
+      deletedCount: deleteResult.affected,
+    } as DeleteResult;
   }
 }

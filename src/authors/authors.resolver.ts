@@ -14,8 +14,9 @@ import { UpdateAuthorInput } from './dto/update-author.input';
 import { BooksService } from '../books/books.service';
 import { Inject } from '@nestjs/common';
 import { GetAuthorInput } from './dto/get-author.input';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { UpdateResult } from 'typeorm';
 import { Book } from '../books/entities/book.entity';
+import { DeleteResult } from '../common/graphql/commonTypes/deleteResult';
 
 @Resolver(() => Author)
 export class AuthorsResolver {
@@ -25,17 +26,24 @@ export class AuthorsResolver {
     private readonly booksService: BooksService,
   ) {}
 
-  @Mutation(() => Author)
+  @Mutation(() => Author, {
+    name: 'createAuthor',
+    description: 'Create a new author',
+  })
   createAuthor(
-    @Args('createAuthorInput') createAuthorInput: CreateAuthorInput,
+    @Args('input') createAuthorInput: CreateAuthorInput,
   ): Promise<Author> {
     return this.authorsService.create(createAuthorInput);
   }
 
-  @Query(() => [Author], { name: 'getAuthors' })
+  @Query(() => [Author], {
+    name: 'getAuthors',
+    nullable: true,
+    description: 'Get authors',
+  })
   findAll(
     @Args({
-      name: 'getAuthorInput',
+      name: 'input',
       nullable: true,
       type: () => GetAuthorInput,
     })
@@ -44,20 +52,21 @@ export class AuthorsResolver {
     return this.authorsService.findAll(getAuthorInput);
   }
 
-  @Query(() => Author, { name: 'author' })
-  findOne(@Args('id', { type: () => Int }) id: number): Promise<Author> {
-    return this.authorsService.findOne(id);
-  }
-
-  @Mutation(() => Author)
+  @Mutation(() => Author, {
+    name: 'updateAuthor',
+    description: 'Update an author',
+  })
   updateAuthor(
-    @Args('updateAuthorInput') updateAuthorInput: UpdateAuthorInput,
+    @Args('input') updateAuthorInput: UpdateAuthorInput,
   ): Promise<UpdateResult> {
-    return this.authorsService.update(updateAuthorInput.id, updateAuthorInput);
+    return this.authorsService.update(updateAuthorInput);
   }
 
-  @Mutation(() => Author)
-  removeAuthor(
+  @Mutation(() => DeleteResult, {
+    name: 'deleteAuthor',
+    description: 'Delete an author',
+  })
+  deleteAuthor(
     @Args('id', { type: () => Int }) id: number,
   ): Promise<DeleteResult> {
     return this.authorsService.remove(id);
