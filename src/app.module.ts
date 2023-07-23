@@ -10,12 +10,15 @@ import {
   MYSQL_PORT,
   MYSQL_USERNAME,
   NODE_ENV,
-} from './util/envConfig';
-import { BooksModule } from './books/books.module';
-import { AuthorsModule } from './authors/authors.module';
-import { DataSource } from 'typeorm';
+} from './common/util/envConfig';
 import { GraphQLError } from 'graphql';
 import { join } from 'path';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
+import { CaslModule } from 'nest-casl';
+import { Roles } from './common/graphql/enums/userEnums';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -47,11 +50,15 @@ import { join } from 'path';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    BooksModule,
-    AuthorsModule,
+    CaslModule.forRoot({
+      superuserRole: Roles.ADMIN,
+      getUserFromRequest: (request) => request.user,
+    }),
+    UsersModule,
+    AuthModule,
+    MailModule,
+    PostsModule,
   ],
   exports: [AppModule],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {}
-}
+export class AppModule {}

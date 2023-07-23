@@ -2,77 +2,167 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Book {
+type PostEntity {
   id: Int!
   title: String!
-  description: String!
-  author: Author
+  content: String!
+  author: User!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  deletedAt: DateTime
 }
 
-type Author {
-  id: Int!
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: ID!
   firstName: String!
   lastName: String!
-  books: [Book!]
+  email: String!
+  roles: [Roles!]!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  deletedAt: DateTime
+  posts: [PostEntity!]!
 }
 
-type DeleteResult {
-  acknowledged: Boolean!
-  deletedCount: Float!
+enum Roles {
+  ADMIN
+  SUBSCRIBED
+  REGISTERED
+}
+
+type UserDeleteResult {
+  status: Boolean!
+  user: User
+}
+
+type CommonResult {
+  status: Boolean!
+  message: String
+}
+
+type LoginResult {
+  user: User!
+  accessToken: String!
 }
 
 type Query {
-  getBooks(input: GetBookInput): [Book!]!
-
-  """Get authors"""
-  getAuthors(input: GetAuthorInput): [Author!]
+  getUsers(input: GetUsersInput): [User!]!
+  whoAmI: User!
+  posts: [PostEntity!]!
+  post(id: Int!): PostEntity!
 }
 
-input GetBookInput {
-  id: [Int!]
-  author: [Int!]
-}
+input GetUsersInput {
+  """Search by id(s)"""
+  id: [Float!]
 
-input GetAuthorInput {
-  id: [Int!]
-  book: [Int!]
+  """Search by deleted status"""
+  deleted: Boolean
+
+  """Search by text"""
+  search: String
 }
 
 type Mutation {
-  createBook(input: CreateBookInput!): Book!
-  updateBook(input: UpdateBookInput!): Book!
-  removeBook(id: Int!): Book!
-
-  """Create a new author"""
-  createAuthor(input: CreateAuthorInput!): Author!
-
-  """Update an author"""
-  updateAuthor(input: UpdateAuthorInput!): Author!
-
-  """Delete an author"""
-  deleteAuthor(id: Int!): DeleteResult!
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(id: String!): UserDeleteResult!
+  register(input: RegisterUserInput!): User!
+  confirmUser(token: String!): CommonResult!
+  resendConfirmationToken(email: String!): CommonResult!
+  forgotPassword(email: String!): CommonResult!
+  resetPassword(input: ResetPasswordInput!): CommonResult!
+  login(input: LoginInput!): LoginResult!
+  createPost(input: CreatePostInput!): PostEntity!
+  updatePost(input: UpdatePostInput!): PostEntity!
+  removePost(id: Int!): PostEntity!
 }
 
-input CreateBookInput {
-  title: String!
-  description: String
-  author: Int
-}
-
-input UpdateBookInput {
-  title: String
-  description: String
-  author: Int
-  id: Int!
-}
-
-input CreateAuthorInput {
+input CreateUserInput {
+  """First name"""
   firstName: String!
+
+  """Last name"""
   lastName: String!
+
+  """Email"""
+  email: String!
+
+  """Password"""
+  password: String!
+
+  """Role"""
+  roles: [Roles!]
+
+  """Status"""
+  status: String
 }
 
-input UpdateAuthorInput {
+input UpdateUserInput {
+  """First name"""
   firstName: String
+
+  """Last name"""
   lastName: String
+
+  """Email"""
+  email: String
+
+  """Password"""
+  password: String
+
+  """Role"""
+  roles: [Roles!]
+
+  """Status"""
+  status: String
+  id: String
+}
+
+input RegisterUserInput {
+  """First name"""
+  firstName: String!
+
+  """Last name"""
+  lastName: String!
+
+  """Email"""
+  email: String!
+
+  """Password"""
+  password: String!
+}
+
+input ResetPasswordInput {
+  token: String!
+  password: String!
+  passwordConfirmation: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreatePostInput {
+  """Title"""
+  title: String!
+
+  """Content"""
+  content: String!
+}
+
+input UpdatePostInput {
+  """Title"""
+  title: String
+
+  """Content"""
+  content: String
   id: Int!
 }
