@@ -35,7 +35,7 @@
     "graphql": "^16.6.0",
     "graphql-subscriptions": "^2.0.0",
     "handlebars": "^4.7.7",
-    "mysql2": "^3.2.4",
+    "mysql2": "^3.5.2",
     "nest-casl": "^1.8.10",
     "nodemailer": "^6.9.3",
     "passport": "^0.6.0",
