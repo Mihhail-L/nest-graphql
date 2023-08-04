@@ -5467,10 +5467,10 @@ neo-async@^2.6.0, neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nest-casl@^1.8.10:
-  version "1.8.10"
-  resolved "https://registry.yarnpkg.com/nest-casl/-/nest-casl-1.8.10.tgz#a3c2b2471f6e77793b39408aa64c60fa0f8c7191"
-  integrity sha512-dA8Rl6cpX2sbw/+OLkiCD0r1MEDbBPOC6LThUtQ7Uty2SokVYkW7VmHfWptLtaznAqrXyhIi8JSToGr/BqC8tQ==
+nest-casl@^1.8.11:
+  version "1.8.11"
+  resolved "https://registry.yarnpkg.com/nest-casl/-/nest-casl-1.8.11.tgz#71346d2074993a89ae8e59f8a5f80cdd6048203f"
+  integrity sha512-lVs+cItnuB4c3hYyOArAC7Cv3hefQbVwAMcEKJ5Gx0K9w6U6GQGjmB3pIXjpDNPRWGFZKc3a8g+9YE+6plegzw==
   dependencies:
     "@casl/ability" "^6.0.0"
     "@ucast/core" "^1.10.1"
